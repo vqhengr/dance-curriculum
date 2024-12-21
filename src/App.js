@@ -35,9 +35,7 @@ function App() {
         <Box>
           {activeTab === 0 && (
             <>
-              <Typography variant="h4" gutterBottom textAlign="center">
-                Students
-              </Typography>
+          
               <StudentList
                 students={students}
                 onStudentClick={handleStudentClick}
