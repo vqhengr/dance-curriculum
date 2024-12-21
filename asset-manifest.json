@@ -1,17 +1,17 @@
 {
   "files": {
     "main.css": "/dance-curriculum/static/css/main.e6c13ad2.css",
-    "main.js": "/dance-curriculum/static/js/main.952ff72b.js",
+    "main.js": "/dance-curriculum/static/js/main.94f815fc.js",
     "static/js/952.bd7076a3.chunk.js": "/dance-curriculum/static/js/952.bd7076a3.chunk.js",
     "static/js/488.4124963d.chunk.js": "/dance-curriculum/static/js/488.4124963d.chunk.js",
     "index.html": "/dance-curriculum/index.html",
     "main.e6c13ad2.css.map": "/dance-curriculum/static/css/main.e6c13ad2.css.map",
-    "main.952ff72b.js.map": "/dance-curriculum/static/js/main.952ff72b.js.map",
+    "main.94f815fc.js.map": "/dance-curriculum/static/js/main.94f815fc.js.map",
     "952.bd7076a3.chunk.js.map": "/dance-curriculum/static/js/952.bd7076a3.chunk.js.map",
     "488.4124963d.chunk.js.map": "/dance-curriculum/static/js/488.4124963d.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.e6c13ad2.css",
-    "static/js/main.952ff72b.js"
+    "static/js/main.94f815fc.js"
   ]
 }
