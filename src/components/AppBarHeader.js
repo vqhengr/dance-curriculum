@@ -5,7 +5,7 @@ const AppBarHeader = () => (
   <AppBar position="static" sx={{ backgroundColor: "#1e88e5" }}>
     <Toolbar>
       <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-        Dance Curriculum
+        Student Portal
       </Typography>
     </Toolbar>
   </AppBar>

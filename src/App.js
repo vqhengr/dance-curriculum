@@ -28,7 +28,7 @@ function App() {
           sx={{ marginBottom: 4 }}
         >
           <Tab label="Students" />
-          <Tab label="Dance Routines" />
+          {/* <Tab label="Dance Routines" /> */}
         </Tabs>
 
         {/* Tab Content */}

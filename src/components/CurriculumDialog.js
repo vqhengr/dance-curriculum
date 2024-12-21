@@ -5,155 +5,140 @@ import {
   DialogContent,
   List,
   ListItem,
-  ListItemText,
-  Button,
-  Box,
   Typography,
   CircularProgress,
+  Button,
+  Box,
+  Grid,
 } from "@mui/material";
-import ReactECharts from "echarts-for-react";
 import supabase from "../services/supabaseClient";
 
 const CurriculumDialog = ({ student, onClose }) => {
-  const [danceStats, setDanceStats] = useState(null);
-  const [loadingStats, setLoadingStats] = useState(false);
+  const [danceRoutines, setDanceRoutines] = useState([]);
+  const [loadingRoutines, setLoadingRoutines] = useState(false);
   const [error, setError] = useState(null);
-  const [cache, setCache] = useState({}); // Cache for dance stats
 
   useEffect(() => {
     if (!student) return;
 
-    // Check cache before fetching
-    if (cache[student.id]) {
-      setDanceStats(cache[student.id]);
-      setError(null);
-      setLoadingStats(false);
-      return;
-    }
-
-    const fetchDanceStats = async () => {
-      setLoadingStats(true);
+    const fetchDanceRoutines = async () => {
+      setLoadingRoutines(true);
       try {
         const { data, error } = await supabase
-          .from("dance_stats")
-          .select("*")
+          .from("danceroutine")
+          .select(
+            "id, link, description, priority_id, source:source_id(source_name), status:status_id(status_name)"
+          )
           .eq("performer_id", student.id)
-          .single();
+          .not("priority_id", "is", null) // Exclude records where priority_id is null
+          .order("priority_id", { ascending: false })
+          .limit(5);
 
-        if (error || !data) {
-          setError("No dance stats available for this student.");
-          setDanceStats(null);
-        } else {
-          setDanceStats(data);
-          setCache((prevCache) => ({
-            ...prevCache,
-            [student.id]: data,
-          })); // Update cache
+        if (error) {
+          throw error;
         }
+
+        setDanceRoutines(data);
       } catch (err) {
-        setError("Failed to fetch dance stats. Please try again.");
-        console.error("Error fetching dance stats:", err.message);
+        setError("Failed to fetch dance routines. Please try again.");
+        console.error("Error fetching dance routines:", err.message);
       } finally {
-        setLoadingStats(false);
+        setLoadingRoutines(false);
       }
     };
 
-    fetchDanceStats();
-  }, [student, cache]);
+    fetchDanceRoutines();
+  }, [student]);
 
-  const getRadarChartOptions = () => {
-    if (!danceStats || !student) return null;
-
-    return {
-      tooltip: {
-        trigger: "item",
-      },
-      radar: {
-        indicator: [
-          { name: "Frame", max: 5 },
-          { name: "Control", max: 5 },
-          { name: "Balance", max: 5 },
-          { name: "Mobility", max: 5 },
-          { name: "Musicality", max: 5 },
-          { name: "Connection", max: 5 },
-        ],
-        shape: "circle",
-      },
-      series: [
-        {
-          name: "Dance Stats",
-          type: "radar",
-          data: [
-            {
-              value: [
-                danceStats.frame,
-                danceStats.control,
-                danceStats.balance,
-                danceStats.mobility,
-                danceStats.musicality,
-                danceStats.connection,
-              ],
-              name: student.display_name,
-            },
-          ],
-          areaStyle: {},
-        },
-      ],
-    };
+  const getStatusStyle = (statusName) => {
+    switch (statusName) {
+      case "Not Started":
+        return { color: "#FFB74D", fontWeight: "bold" }; // Soft Orange
+      case "In Progress":
+        return { color: "#64B5F6", fontWeight: "bold" }; // Light Blue
+      case "Completed":
+        return { color: "#81C784", fontWeight: "bold" }; // Soft Green
+      default:
+        return { color: "#BDBDBD", fontWeight: "bold" }; // Light Grey for unknown status
+    }
   };
-
-  const radarOptions = getRadarChartOptions();
 
   return (
     <Dialog open={!!student} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>
         {student?.display_name
-          ? `${student.display_name}'s Curriculum`
-          : "Curriculum Details"}
+          ? `${student.display_name}'s Top Dance Routines`
+          : "Dance Routines"}
       </DialogTitle>
       <DialogContent>
-        {/* Curriculum Section */}
-        {student?.curriculum?.length > 0 ? (
+        {loadingRoutines ? (
+          <Box display="flex" justifyContent="center" marginTop={2}>
+            <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Typography variant="body2" color="error" textAlign="center">
+            {error}
+          </Typography>
+        ) : danceRoutines.length > 0 ? (
           <List>
-            {student.curriculum.map((course, index) => (
-              <ListItem key={index} divider>
-                <ListItemText
-                  primary={course.dance}
-                  secondary={`Level: ${course.level}, Progress: ${course.progress}`}
-                  primaryTypographyProps={{ fontWeight: "bold" }}
-                  secondaryTypographyProps={{ color: "textSecondary" }}
-                />
+            {danceRoutines.map((routine) => (
+              <ListItem key={routine.id} divider>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <Typography variant="subtitle1" fontWeight="bold">
+                      Routine ID: {routine.id}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography variant="body2">
+                      <strong>Description:</strong>{" "}
+                      {routine.description || "No description available"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2">
+                      <strong>Priority:</strong> {routine.priority_id || "N/A"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography
+                      variant="body2"
+                      sx={getStatusStyle(routine.status?.status_name)}
+                    >
+                      <strong>Status:</strong> {routine.status?.status_name || "Unknown"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography variant="body2">
+                      <strong>Source:</strong> {routine.source?.source_name || "Unknown"}
+                    </Typography>
+                  </Grid>
+                  {routine.link && (
+                    <Grid item xs={12}>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        href={routine.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        sx={{
+                          textTransform: "none",
+                          marginBottom: 2,
+                        }}
+                      >
+                        View Routine
+                      </Button>
+                    </Grid>
+                  )}
+                </Grid>
               </ListItem>
             ))}
           </List>
         ) : (
-          <Typography variant="body1" color="textSecondary" textAlign="center">
-            No curriculum data available for this student.
+          <Typography variant="body2" textAlign="center" color="textSecondary">
+            No dance routines available for this student.
           </Typography>
         )}
-
-        {/* Dance Stats Section */}
-        <Box marginTop={4}>
-          <Typography variant="h6" textAlign="center" gutterBottom>
-            Dance Stats
-          </Typography>
-          {loadingStats ? (
-            <CircularProgress />
-          ) : error ? (
-            <Typography variant="body2" color="error" textAlign="center">
-              {error}
-            </Typography>
-          ) : radarOptions ? (
-            <ReactECharts
-              option={radarOptions}
-              style={{ height: "400px", width: "100%" }}
-            />
-          ) : (
-            <Typography variant="body2" textAlign="center">
-              No dance stats available for this student.
-            </Typography>
-          )}
-        </Box>
 
         <Box textAlign="center" marginTop={2}>
           <Button
