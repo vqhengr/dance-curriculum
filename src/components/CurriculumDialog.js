@@ -67,7 +67,7 @@ const CurriculumDialog = ({ student, onClose }) => {
     <Dialog open={!!student} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>
         {student?.display_name
-          ? `${student.display_name}'s Top Dance Routines`
+          ? `${student.display_name}'s Curriculum`
           : "Dance Routines"}
       </DialogTitle>
       <DialogContent>
