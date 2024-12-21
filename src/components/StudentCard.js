@@ -29,12 +29,17 @@ const StudentCard = ({ student, onViewStats, onViewCurriculum }) => (
           variant="contained"
           sx={{
             textTransform: "none",
-            backgroundColor: "#1976d2", // Primary blue
+            backgroundColor: "#1976d2",
             "&:hover": {
-              backgroundColor: "#115293", // Darker blue on hover
+              backgroundColor: "#115293",
+            },
+            "&.Mui-disabled": {
+              backgroundColor: "#b0bec5", // Light grey for disabled state
+              color: "#ffffff",
             },
           }}
           onClick={onViewStats}
+          disabled={student.disabled_stats_view} // Disable if disabled_stats_view is true
         >
           View Dance Stats
         </Button>
@@ -42,10 +47,10 @@ const StudentCard = ({ student, onViewStats, onViewCurriculum }) => (
           variant="outlined"
           sx={{
             textTransform: "none",
-            borderColor: "#ff7043", // Orange border
-            color: "#ff7043", // Orange text
+            borderColor: "#ff7043",
+            color: "#ff7043",
             "&:hover": {
-              backgroundColor: "#ffe0b2", // Light orange on hover
+              backgroundColor: "#ffe0b2",
               borderColor: "#ff7043",
             },
           }}
