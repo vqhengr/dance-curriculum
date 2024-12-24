@@ -1,23 +1,53 @@
-import React, { useState } from "react";
-import { Container, Typography, Tabs, Tab, Box } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { Container, Tabs, Tab, Box } from "@mui/material";
 import AppBarHeader from "./components/AppBarHeader";
 import StudentList from "./components/StudentList";
 import CurriculumDialog from "./components/CurriculumDialog";
 import DanceRoutinesPage from "./pages/DanceRoutinesPage";
-import students from "./data/students";
+import AdminAddClassPage from "./pages/AdminAddClassPage";
+import UserProfilePage from "./pages/UserProfilePage"; // Import UserProfilePage
+import SignInPage from "./pages/SignInPage";
+import supabase from "./services/supabaseClient";
 
 function App() {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    // Subscribe to auth state changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user || null);
+    });
+
+    // Fetch current user on initial load
+    const fetchUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      setUser(data?.user || null);
+    };
+
+    fetchUser();
+
+    // Cleanup subscription
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, []);
 
   const handleStudentClick = (student) => setSelectedStudent(student);
   const handleClose = () => setSelectedStudent(null);
   const handleTabChange = (event, newValue) => setActiveTab(newValue);
 
+  if (!user) {
+    return <SignInPage />;
+  }
+
   return (
     <div>
       {/* Header */}
-      <AppBarHeader />
+
 
       {/* Tabs for Navigation */}
       <Container sx={{ marginTop: 4 }}>
@@ -28,16 +58,17 @@ function App() {
           sx={{ marginBottom: 4 }}
         >
           <Tab label="Students" />
-          {/* <Tab label="Dance Routines" /> */}
+          <Tab label="Dance Routines" />
+          <Tab label="Add Class" />
+          <Tab label="Profile" /> {/* New Tab for User Profile */}
         </Tabs>
 
         {/* Tab Content */}
         <Box>
           {activeTab === 0 && (
             <>
-          
               <StudentList
-                students={students}
+                students={[]}
                 onStudentClick={handleStudentClick}
               />
               <CurriculumDialog
@@ -47,6 +78,8 @@ function App() {
             </>
           )}
           {activeTab === 1 && <DanceRoutinesPage />}
+          {activeTab === 2 && <AdminAddClassPage />}
+          {activeTab === 3 && <UserProfilePage />} {/* Render UserProfilePage */}
         </Box>
       </Container>
     </div>
